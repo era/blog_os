@@ -80,7 +80,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 pub extern "C" fn _start() -> ! {
     init();
     test_main();
-    blog_os::hlt_loop();
+    hlt_loop();
 }
 
 #[cfg(test)]
