@@ -1,5 +1,7 @@
 #![no_std]
 #![cfg_attr(test, no_main)]
+#![feature(const_in_array_repeat_expressions)]
+#![feature(const_fn)]
 #![feature(alloc_error_handler)]
 #![feature(custom_test_frameworks)]
 #![feature(abi_x86_interrupt)]
