@@ -1,5 +1,6 @@
 #![no_std]
 #![cfg_attr(test, no_main)]
+#![feature(wake_trait)]
 #![feature(const_in_array_repeat_expressions)]
 #![feature(const_fn)]
 #![feature(alloc_error_handler)]
@@ -22,6 +23,7 @@ pub mod interrupts;
 pub mod gdt;
 pub mod memory;
 pub mod allocator;
+pub mod task;
 
 pub fn init() {
     gdt::init();

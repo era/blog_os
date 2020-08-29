@@ -11,10 +11,20 @@ use alloc::boxed::Box;
 use x86_64::{structures::paging::{Page, MapperAllSizes}, VirtAddr};
 use core::panic::PanicInfo;
 use blog_os::{println, serial_println, serial_print, QemuExitCode, exit_qemu, memory};
-
+use blog_os::task::{Task, executor::Executor};
 use bootloader::{BootInfo, entry_point};
+use blog_os::task::keyboard;
 
 entry_point!(kernel_main);
+
+async fn async_number() -> u32 {
+    42
+}
+
+async fn example_task() {
+    let number = async_number().await;
+    println!("async number: {}", number);
+}
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use blog_os::allocator;
@@ -27,9 +37,15 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     let mut frame_allocator = unsafe {
         memory::BootInfoFrameAllocator::init(&boot_info.memory_map)
     };
+    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 
     let page = Page::containing_address(VirtAddr::new(0));
     memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
+
+    let mut executor = Executor::new();
+    executor.spawn(Task::new(example_task()));
+    executor.spawn(Task::new(keyboard::print_keypresses())); 
+    executor.run();
 
     // write the string `New!` to the screen through the new mapping
     let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
